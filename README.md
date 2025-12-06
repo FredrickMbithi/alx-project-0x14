@@ -2,151 +2,162 @@
 
 A modern movie discovery application built with Next.js 14, TypeScript, and Tailwind CSS. Browse thousands of movies, filter by genre and year, and discover your next cinematic experience.
 
-## 🛠️ Tech Stack
+# ALX Project 0x14 – CineSeek Movie App
 
-- **Next.js 14** (Pages Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Font Awesome** icons
-- **MoviesDatabase API** (RapidAPI)
+This repository contains a Next.js 14 application (Pages Router) that integrates with the MoviesDatabase API on RapidAPI to list and filter movies.
 
-## 📁 Project Structure
+## API Overview
+
+The MoviesDatabase API provides structured movie metadata including titles, images, release years, and pagination helpers. You can query titles by year, genre, lists (e.g., top rated), and paginate results.
+
+Key features:
+
+- Title search and list endpoints
+- Filter by year and genre
+- Paginated results
+- Includes primary images and title text per item
+
+## Version
+
+API version: Refer to RapidAPI MoviesDatabase documentation (current version exposed via `titles` endpoints; versioning managed by provider on RapidAPI).
+
+## Available Endpoints
+
+- `GET /titles` – Fetch titles. Supports query params like `year`, `genre`, `page`, `limit`, `sort`.
+- `GET /titles?list=top_rated_english_250` – Predefined list of top-rated English titles.
+- `GET /titles/search/keyword/{keyword}` – Search titles by keyword.
+- Other variations exist; consult the RapidAPI docs for complete list.
+
+## Request and Response Format
+
+Example request:
 
 ```
-├── components/
-│   ├── layout/
-│   │   ├── Header.tsx      # Navigation header
-│   │   ├── Footer.tsx      # Site footer
-│   │   └── Layout.tsx      # Page wrapper
-│   ├── movies/
-│   │   ├── MovieCard.tsx   # Movie display card
-│   │   ├── Loading.tsx     # Loading skeleton
-│   │   ├── FilterBar.tsx   # Year/genre filters
-│   │   └── Pagination.tsx  # Page navigation
-│   └── ui/
-│       └── Button.tsx      # Reusable button
-├── interfaces/
-│   └── index.ts            # TypeScript interfaces
-├── pages/
-│   ├── api/
-│   │   └── fetch-movies.ts # Movies API route
-│   ├── movies/
-│   │   └── index.tsx       # Movies listing page
-│   ├── _app.tsx            # App wrapper
-│   ├── _document.tsx       # HTML document
-│   ├── index.tsx           # Landing page
-│   └── 404.tsx             # Not found page
-├── styles/
-│   └── globals.css         # Global styles
-└── .env.local              # Environment variables
+GET https://moviesdatabase.p.rapidapi.com/titles?year=2024&sort=year.decr&limit=12&page=1
+Headers:
+  x-rapidapi-host: moviesdatabase.p.rapidapi.com
+  x-rapidapi-key: <YOUR_API_KEY>
 ```
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 16+
-- npm or yarn
-- RapidAPI account for MoviesDatabase API
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone <repository-url>
-cd cineseek-explorer
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Configure environment variables:
-
-```bash
-# Create .env.local file with:
-NEXT_PUBLIC_API_URL=https://moviesdatabase.p.rapidapi.com
-RAPIDAPI_KEY=your_rapidapi_key_here
-RAPIDAPI_HOST=moviesdatabase.p.rapidapi.com
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
-```
-
-4. Start the development server:
-
-```bash
-npm run dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000)
-
-## 📡 API Endpoints
-
-### `GET /api/fetch-movies`
-
-Fetches movies from MoviesDatabase API.
-
-**Query Parameters:**
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `page` | number | Page number (default: 1) |
-| `year` | number | Filter by release year |
-| `genre` | string | Filter by genre |
-| `list` | string | Movie list (default: top_rated_english_250) |
-
-**Response:**
+Typical response shape:
 
 ```json
 {
+  "page": 1,
+  "next": "...",
+  "entries": 250,
   "results": [
     {
       "id": "tt1234567",
-      "title": "Movie Title",
-      "year": 2024,
-      "image": "https://...",
-      "rating": 8.5,
-      "genre": ["Action", "Drama"],
-      "description": "Movie description..."
+      "primaryImage": {
+        "url": "https://m.media-amazon.com/...jpg"
+      },
+      "titleText": { "text": "Movie Title" },
+      "releaseYear": { "year": 2024 }
     }
-  ],
-  "page": 1,
-  "totalPages": 25,
-  "totalResults": 250
+  ]
 }
 ```
 
-## 🎨 Features
+Frontend-transformed shape used by this app (subset):
 
-- ✅ Responsive design (mobile-first)
-- ✅ Server-side rendering (SSR)
-- ✅ API route for secure API key handling
-- ✅ Movie filtering by year and genre
-- ✅ Pagination support
-- ✅ Loading skeletons
-- ✅ Error handling with fallbacks
-- ✅ TypeScript throughout
-- ✅ Tailwind CSS styling
-
-## 📜 Scripts
-
-```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+```ts
+interface MoviesProps {
+  id: string;
+  primaryImage: { url: string };
+  titleText: { text: string };
+  releaseYear: { year: string };
+}
 ```
 
-## 🔒 Environment Variables
+## Authentication
 
-| Variable               | Required | Description                              |
-| ---------------------- | -------- | ---------------------------------------- |
-| `RAPIDAPI_KEY`         | Yes      | Your RapidAPI key                        |
-| `RAPIDAPI_HOST`        | Yes      | API host (moviesdatabase.p.rapidapi.com) |
-| `NEXT_PUBLIC_API_URL`  | No       | API base URL                             |
-| `NEXT_PUBLIC_BASE_URL` | No       | App base URL for SSR                     |
+All requests require RapidAPI headers:
 
-## 📄 License
+- `x-rapidapi-host: moviesdatabase.p.rapidapi.com`
+- `x-rapidapi-key: <YOUR_API_KEY>`
+
+Store your key in `.env.local`:
+
+```
+MOVIE_API_KEY=YOUR_RAPIDAPI_KEY
+```
+
+Never commit secrets to version control.
+
+## Error Handling
+
+Common errors:
+
+- `401/403` – Invalid key or not subscribed to API
+- `429` – Rate limit exceeded
+- `5xx` – Provider-side issue
+
+Client pattern:
+
+- Use `try/catch`
+- Check `response.ok`; if false, read body and show user-friendly message
+- Provide a retry action
+
+Server route (`pages/api/fetch-movies.ts`): returns `{ movies }` on success; responds `405` for non-POST.
+
+## Usage Limits and Best Practices
+
+- Respect rate limits; cache or debounce on the client
+- Request only needed fields and use pagination (`limit`, `page`)
+- Validate filters (year, genre) before requests
+- Secure keys via environment variables
+- Handle `primaryImage` missing cases with fallbacks
+
+## Tech Stack
+
+- Next.js 14 (Pages Router)
+- TypeScript
+- Tailwind CSS
+- Font Awesome
+- MoviesDatabase API (RapidAPI)
+
+## Project Structure
+
+```
+components/
+  commons/
+    Button.tsx
+    Loading.tsx
+    MovieCard.tsx
+  layouts/
+    Header.tsx
+    Footer.tsx
+    Layout.tsx
+interfaces/
+  index.ts
+pages/
+  api/
+    fetch-movies.ts
+  index.tsx
+  movies/
+    index.tsx
+styles/
+  globals.css
+next.config.js
+.env.local
+```
+
+## Getting Started
+
+```bash
+npm install
+npm run dev
+# open http://localhost:3000
+```
+
+## Environment Variables
+
+- `MOVIE_API_KEY`: RapidAPI key for MoviesDatabase
+
+## Notes
+
+- Next.js Image is configured for external domains including `m.media-amazon.com`.
+- The movies page calls `/api/fetch-movies` via POST with `{ page, year, genre }`.
 
 MIT License
