@@ -50,3 +50,25 @@ const MovieCard = ({ movie, index = 0 }: MovieCardProps) => {
             </div>
           )}
           {movie.description && (
+            <p className="line-clamp-3 text-xs text-gray-400">
+              {movie.description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-4">
+        <h3 className="font-display text-base font-semibold text-white line-clamp-1 transition-colors group-hover:text-primary">
+          {movie.title}
+        </h3>
+        <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+          <FontAwesomeIcon icon={faCalendar} className="h-3 w-3" />
+          <span>{movie.year}</span>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+export default MovieCard;
