@@ -1,164 +1,131 @@
-import { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilm } from "@fortawesome/free-solid-svg-icons";
-import Layout from "@/components/layout/Layout";
-import MovieCard from "@/components/movies/MovieCard";
-import Loading from "@/components/movies/Loading";
-import FilterBar from "@/components/movies/FilterBar";
-import Pagination from "@/components/movies/Pagination";
-import type { FilterOptions, MoviesResponse } from "@/interfaces";
+import Button from "@/components/commons/Button";
+import Loading from "@/components/commons/Loading";
+import MovieCard from "@/components/commons/MovieCard";
+import { MoviesProps } from "@/interfaces";
+import { useCallback, useEffect, useState } from "react";
 
-const MoviesPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [moviesData, setMoviesData] = useState<MoviesResponse | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState<FilterOptions>({});
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchMovies = async () => {
-    setIsLoading(true);
-    setError(null);
+interface MProps {
+  movies: MoviesProps[]
+}
 
-    try {
-      // Build query string
-      const params = new URLSearchParams();
-      params.set("page", currentPage.toString());
+const Movies: React.FC<MProps> = () => {
 
-      if (filters.year) {
-        params.set("year", filters.year.toString());
+  const [page, setPage] = useState<number>(1)
+  const [year, setYear] = useState<number | null>(null)
+  const [genre, setGenre] = useState<string>("All")
+  const [movies, setMovies] = useState<MoviesProps[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+
+ const fetchMovies = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    const response = await fetch('/api/fetch-movies', {
+      method: 'POST',
+      body: JSON.stringify({
+        page,
+        year, 
+        genre: genre === "All" ? "" : genre
+      }),
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8'
       }
-      if (filters.genre) {
-        params.set("genre", filters.genre);
-      }
+    })
 
-      const response = await fetch(`/api/fetch-movies?${params.toString()}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch movies");
-      }
-
-      const data: MoviesResponse = await response.json();
-      setMoviesData(data);
-    } catch (err) {
-      console.error("Failed to fetch movies:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setMoviesData(null);
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      setError(err?.error || "Failed to fetch movies");
+      setLoading(false);
+      return;
     }
-  };
+
+    const data = await response.json()
+    const results = data.movies
+    console.log(results)
+    setMovies(results)
+    setLoading(false)
+  }, [page, year, genre])
+
 
   useEffect(() => {
-    fetchMovies();
-  }, [currentPage, filters]);
+    fetchMovies()
+  }, [fetchMovies])
 
-  const handleFilterChange = (newFilters: FilterOptions) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
-  };
 
-  const handleResetFilters = () => {
-    setFilters({});
-    setCurrentPage(1);
-  };
+
 
   return (
-    <Layout>
-      {/* Page Header */}
-      <section className="border-b border-gray-800/50 bg-background-card/30 py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary glow-gold">
-              <FontAwesomeIcon
-                icon={faFilm}
-                className="h-5 w-5 text-black"
-              />
-            </div>
-            <h1 className="font-display text-3xl font-bold text-white sm:text-4xl">
-              Movies
-            </h1>
-          </div>
-          <p className="text-gray-400 max-w-2xl">
-            Browse our collection of films. Use filters to find movies by year
-            or genre.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#110F17] text-white px-4 md:px-10 lg:px-44">
+  <div className="py-16">
+    <div className="flex flex-col md:flex-row justify-between mb-4 items-center space-x-0 md:space-x-4">
+      <input
+        type="text"
+        placeholder="Search for a movie..."
+        className="border-2 w-full md:w-96 border-[#E2D609] outline-none bg-transparent px-4 py-2 rounded-full text-white placeholder-gray-400"
+      />
 
-      {/* Filters */}
-      <section className="border-b border-gray-800/50 py-4">
-        <div className="container mx-auto px-4">
-          <FilterBar
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onReset={handleResetFilters}
+      <select
+        onChange={(event: React.ChangeEvent<HTMLSelectElement>) => setYear(Number(event.target.value))}
+        className="border-2 border-[#E2D609] outline-none bg-transparent px-4 md:px-8 py-2 mt-4 md:mt-0 rounded-full w-full md:w-auto"
+      >
+        <option value="">Select Year</option>
+        {
+          [2024, 2023, 2022, 2021, 2020, 2019].map((year: number) => (
+            <option value={year} key={year}>{year}</option>
+          ))
+        }
+      </select>
+    </div>
+
+    <p className="text-[#E2D609] text-xl mb-6 mt-6">Online streaming</p>
+    <div className="flex flex-col md:flex-row items-center justify-between">
+      <h1 className="text-lg md:text-6xl font-bold">{year} {genre} Movie List</h1>
+      <div className="flex flex-wrap space-x-0 md:space-x-4 mt-4 md:mt-0">
+          {['All', 'Animation', 'Comedy', 'Fantasy'].map((g: string, key: number) => (
+            <Button title={g} key={key} action={() => setGenre(g)} />
+          ))}
+      </div>
+    </div>
+
+    {/* Error message */}
+    {error && (
+      <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
+        <p>{error}</p>
+        <button
+          onClick={fetchMovies}
+          className="mt-2 text-sm text-red-300 underline hover:no-underline"
+        >
+          Try again
+        </button>
+      </div>
+    )}
+
+    {/* Movies output */}
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 mt-10">
+      {
+        movies?.map((movie: MoviesProps, key: number) => (
+          <MovieCard
+            title={movie?.titleText.text}
+            posterImage={movie?.primaryImage?.url}
+            releaseYear={movie?.releaseYear.year}
+            key={key}
           />
-        </div>
-      </section>
+        ))
+      }
+    </div>
+    <div className="flex justify-end space-x-4 mt-6">
+      <Button title="Previous" action={() => setPage(prev => prev > 1 ? prev - 1 : 1)} />
+      <Button title="Next" action={() => setPage(page + 1)} />
+    </div>
+  </div>
+  {
+    loading && <Loading />
+  }
+</div>
 
-      {/* Movies Grid */}
-      <section className="py-10">
-        <div className="container mx-auto px-4">
-          {/* Error State */}
-          {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400">
-              <p>{error}</p>
-              <button
-                onClick={fetchMovies}
-                className="mt-2 text-sm text-red-300 underline hover:no-underline"
-              >
-                Try again
-              </button>
-            </div>
-          )}
+  )
+}
 
-          {/* Loading State */}
-          {isLoading ? (
-            <Loading count={8} />
-          ) : moviesData && moviesData.results.length > 0 ? (
-            <>
-              {/* Results Count */}
-              <p className="mb-6 text-sm text-gray-400">
-                Showing {moviesData.results.length} of {moviesData.totalResults}{" "}
-                movies
-              </p>
 
-              {/* Grid */}
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
-                {moviesData.results.map((movie, idx) => (
-                  <MovieCard key={movie.id} movie={movie} index={idx} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              <div className="mt-12">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={moviesData.totalPages}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            </>
-          ) : (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <FontAwesomeIcon
-                icon={faFilm}
-                className="h-16 w-16 text-gray-600 mb-4"
-              />
-              <h3 className="font-display text-xl font-semibold text-white">
-                No movies found
-              </h3>
-              <p className="mt-2 text-gray-400">
-                Try adjusting your filters to find more results.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-    </Layout>
-  );
-};
-
-export default MoviesPage;
+export default Movies;
