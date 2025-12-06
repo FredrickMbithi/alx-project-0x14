@@ -1,73 +1,152 @@
-# Welcome to your Lovable project
+# CineSeek - Movie Discovery App
 
-## Project info
+A modern movie discovery application built with Next.js 14, TypeScript, and Tailwind CSS. Browse thousands of movies, filter by genre and year, and discover your next cinematic experience.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🛠️ Tech Stack
 
-## How can I edit this code?
+- **Next.js 14** (Pages Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **Font Awesome** icons
+- **MoviesDatabase API** (RapidAPI)
 
-There are several ways of editing your application.
+## 📁 Project Structure
 
-**Use Lovable**
+```
+├── components/
+│   ├── layout/
+│   │   ├── Header.tsx      # Navigation header
+│   │   ├── Footer.tsx      # Site footer
+│   │   └── Layout.tsx      # Page wrapper
+│   ├── movies/
+│   │   ├── MovieCard.tsx   # Movie display card
+│   │   ├── Loading.tsx     # Loading skeleton
+│   │   ├── FilterBar.tsx   # Year/genre filters
+│   │   └── Pagination.tsx  # Page navigation
+│   └── ui/
+│       └── Button.tsx      # Reusable button
+├── interfaces/
+│   └── index.ts            # TypeScript interfaces
+├── pages/
+│   ├── api/
+│   │   └── fetch-movies.ts # Movies API route
+│   ├── movies/
+│   │   └── index.tsx       # Movies listing page
+│   ├── _app.tsx            # App wrapper
+│   ├── _document.tsx       # HTML document
+│   ├── index.tsx           # Landing page
+│   └── 404.tsx             # Not found page
+├── styles/
+│   └── globals.css         # Global styles
+└── .env.local              # Environment variables
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🚀 Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 16+
+- npm or yarn
+- RapidAPI account for MoviesDatabase API
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
 
-Follow these steps:
+```bash
+git clone <repository-url>
+cd cineseek-explorer
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Install dependencies:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+npm install
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. Configure environment variables:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# Create .env.local file with:
+NEXT_PUBLIC_API_URL=https://moviesdatabase.p.rapidapi.com
+RAPIDAPI_KEY=your_rapidapi_key_here
+RAPIDAPI_HOST=moviesdatabase.p.rapidapi.com
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
+
+4. Start the development server:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+5. Open [http://localhost:3000](http://localhost:3000)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📡 API Endpoints
 
-**Use GitHub Codespaces**
+### `GET /api/fetch-movies`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Fetches movies from MoviesDatabase API.
 
-## What technologies are used for this project?
+**Query Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `page` | number | Page number (default: 1) |
+| `year` | number | Filter by release year |
+| `genre` | string | Filter by genre |
+| `list` | string | Movie list (default: top_rated_english_250) |
 
-This project is built with:
+**Response:**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```json
+{
+  "results": [
+    {
+      "id": "tt1234567",
+      "title": "Movie Title",
+      "year": 2024,
+      "image": "https://...",
+      "rating": 8.5,
+      "genre": ["Action", "Drama"],
+      "description": "Movie description..."
+    }
+  ],
+  "page": 1,
+  "totalPages": 25,
+  "totalResults": 250
+}
+```
 
-## How can I deploy this project?
+## 🎨 Features
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+- ✅ Responsive design (mobile-first)
+- ✅ Server-side rendering (SSR)
+- ✅ API route for secure API key handling
+- ✅ Movie filtering by year and genre
+- ✅ Pagination support
+- ✅ Loading skeletons
+- ✅ Error handling with fallbacks
+- ✅ TypeScript throughout
+- ✅ Tailwind CSS styling
 
-## Can I connect a custom domain to my Lovable project?
+## 📜 Scripts
 
-Yes, you can!
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔒 Environment Variables
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+| Variable               | Required | Description                              |
+| ---------------------- | -------- | ---------------------------------------- |
+| `RAPIDAPI_KEY`         | Yes      | Your RapidAPI key                        |
+| `RAPIDAPI_HOST`        | Yes      | API host (moviesdatabase.p.rapidapi.com) |
+| `NEXT_PUBLIC_API_URL`  | No       | API base URL                             |
+| `NEXT_PUBLIC_BASE_URL` | No       | App base URL for SSR                     |
+
+## 📄 License
+
+MIT License
