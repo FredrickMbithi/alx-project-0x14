@@ -1,4 +1,4 @@
-import { MovieProps } from "@/alx-movie-app/interfaces"
+import { MovieProps } from "@/interfaces"
 import Image from "next/image"
 
 const MovieCard: React.FC<MovieProps> = ({ title, posterImage, releaseYear }) => {

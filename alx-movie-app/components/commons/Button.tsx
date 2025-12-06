@@ -1,4 +1,4 @@
-import { ButtonProps } from "@/alx-movie-app/interfaces";
+import { ButtonProps } from "@/interfaces";
 
 const Button: React.FC<ButtonProps> = ({ title, action }) => {
   return (

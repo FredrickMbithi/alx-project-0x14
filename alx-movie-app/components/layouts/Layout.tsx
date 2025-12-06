@@ -1,4 +1,4 @@
-import { ComponentProps } from "@/alx-movie-app/interfaces";
+import { ComponentProps } from "@/interfaces";
 import Header from "./Header";
 import Footer from "./Footer";
 
