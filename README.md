@@ -8,25 +8,35 @@ This repository contains a Next.js 14 application (Pages Router) that integrates
 
 ## API Overview
 
-The MoviesDatabase API provides structured movie metadata including titles, images, release years, and pagination helpers. You can query titles by year, genre, lists (e.g., top rated), and paginate results.
+The MoviesDatabase API on RapidAPI provides rich, up-to-date metadata for movies, series, episodes, and actors. It supports filtering by year and genre, predefined lists (e.g., top rated), keyword and title search, pagination, and optional "info" selections to control payload size.
 
 Key features:
 
-- Title search and list endpoints
-- Filter by year and genre
-- Paginated results
-- Includes primary images and title text per item
+- Title discovery and predefined lists
+- Keyword/title/aka search endpoints
+- Year/genre filters and sorting (e.g., `year.decr`)
+- Consistent paginated responses with `page`, `entries`, and `results`
+- Actor endpoints and utility endpoints (genres, title types, lists)
 
 ## Version
 
-API version: Refer to RapidAPI MoviesDatabase documentation (current version exposed via `titles` endpoints; versioning managed by provider on RapidAPI).
+The API is currently unversioned on RapidAPI; endpoints are served under `https://moviesdatabase.p.rapidapi.com`. Versioning and schema changes are managed by the provider. Always consult the RapidAPI documentation for the latest behavior.
 
 ## Available Endpoints
 
-- `GET /titles` – Fetch titles. Supports query params like `year`, `genre`, `page`, `limit`, `sort`.
-- `GET /titles?list=top_rated_english_250` – Predefined list of top-rated English titles.
+- `GET /titles` – Returns titles with optional filters (`year`, `genre`, `limit`, `page`, `sort`, `info`).
+- `GET /titles/{id}` – Returns a single title by IMDb ID.
+- `GET /titles/{id}/ratings` – Returns rating and votes for a title.
+- `GET /titles/series/{id}` – Returns episodes (light) for a series.
+- `GET /titles/series/{id}/{season}` – Returns episode IDs for a specific season.
+- `GET /titles/x/upcoming` – Returns upcoming titles.
 - `GET /titles/search/keyword/{keyword}` – Search titles by keyword.
-- Other variations exist; consult the RapidAPI docs for complete list.
+- `GET /titles/search/title/{title}` – Search titles by title (supports `exact=true`).
+- `GET /actors` – Returns actors with pagination.
+- `GET /actors/{id}` – Returns actor details.
+- `GET /title/utils/titleType` – Returns available title types.
+- `GET /title/utils/genres` – Returns available genres.
+- `GET /title/utils/lists` – Returns predefined title lists (e.g., `top_rated_250`).
 
 ## Request and Response Format
 
@@ -39,19 +49,17 @@ Headers:
   x-rapidapi-key: <YOUR_API_KEY>
 ```
 
-Typical response shape:
+Typical response shape (paginated collections):
 
 ```json
 {
   "page": 1,
-  "next": "...",
+  "next": "https://...page=2",
   "entries": 250,
   "results": [
     {
       "id": "tt1234567",
-      "primaryImage": {
-        "url": "https://m.media-amazon.com/...jpg"
-      },
+      "primaryImage": { "url": "https://m.media-amazon.com/...jpg" },
       "titleText": { "text": "Movie Title" },
       "releaseYear": { "year": 2024 }
     }
@@ -59,7 +67,7 @@ Typical response shape:
 }
 ```
 
-Frontend-transformed shape used by this app (subset):
+Subset used in this app:
 
 ```ts
 interface MoviesProps {
@@ -72,7 +80,7 @@ interface MoviesProps {
 
 ## Authentication
 
-All requests require RapidAPI headers:
+Include RapidAPI headers with each request:
 
 - `x-rapidapi-host: moviesdatabase.p.rapidapi.com`
 - `x-rapidapi-key: <YOUR_API_KEY>`
@@ -89,25 +97,25 @@ Never commit secrets to version control.
 
 Common errors:
 
-- `401/403` – Invalid key or not subscribed to API
+- `401/403` – Invalid API key or subscription issue
 - `429` – Rate limit exceeded
 - `5xx` – Provider-side issue
 
-Client pattern:
+Handling strategy:
 
-- Use `try/catch`
-- Check `response.ok`; if false, read body and show user-friendly message
-- Provide a retry action
+- Check `response.ok` and surface meaningful messages
+- Wrap fetches in `try/catch`; provide retry actions
+- Gracefully handle empty/missing fields (e.g., `primaryImage`)
 
-Server route (`pages/api/fetch-movies.ts`): returns `{ movies }` on success; responds `405` for non-POST.
+Server route (`pages/api/fetch-movies.ts`) returns `{ movies }` on success and `405` for non-POST.
 
 ## Usage Limits and Best Practices
 
-- Respect rate limits; cache or debounce on the client
-- Request only needed fields and use pagination (`limit`, `page`)
-- Validate filters (year, genre) before requests
-- Secure keys via environment variables
-- Handle `primaryImage` missing cases with fallbacks
+- Respect rate limits (debounce user input; paginate results)
+- Request only necessary data via `info` parameter
+- Validate filters and sanitize inputs
+- Cache results where practical (client-side or server-side)
+- Keep API keys in environment variables and out of source control
 
 ## Tech Stack
 
